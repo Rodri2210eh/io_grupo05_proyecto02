@@ -6,39 +6,60 @@ class Dinamico:
         self.row = row
         self.column = column
     
-    def collectGold(self, gold, i, j, register):
-        
+    def collectGold(self, gold, i, j, register, caminosOptimos):
         # Base condition.
         if ((i < 0) or (i == self.row) or (j == self.column)):
-            return 0
+            currentPath = []
+            return 0, currentPath
     
         if(register[i][j] != -1):
-            return register[i][j]
+            return register[i][j], caminosOptimos[i][j]
     
         # Right upper diagonal
-        rightUpperDiagonal = self.collectGold(gold, i - 1, j + 1, register)
+        rightUpperDiagonal, camino1 = self.collectGold(gold, i - 1, j + 1, register, caminosOptimos)
     
-            # right
-        right = self.collectGold(gold, i, j + 1, register)
+        # right
+        right, camino2 = self.collectGold(gold, i, j + 1, register, caminosOptimos)
     
         # Lower right diagonal
-        rightLowerDiagonal = self.collectGold(gold, i + 1, j + 1, register)
+        rightLowerDiagonal, camino3 = self.collectGold(gold, i + 1, j + 1, register, caminosOptimos)
     
         # Return the maximum and store the value
-        register[i][j] = gold[i][j] + max(max(rightUpperDiagonal, rightLowerDiagonal), right)
-        return register[i][j]
+        actualGold = gold[i][j]
+        currentPath = [[i, j]]
+        
+        maximoObtenido = max(max(rightUpperDiagonal, rightLowerDiagonal), right)
+        if maximoObtenido == rightUpperDiagonal:
+            register[i][j] = actualGold + rightUpperDiagonal
+            if camino1 != []:
+                caminosOptimos[i][j] = currentPath + camino1
+            else:
+                caminosOptimos[i][j] = currentPath
+        elif maximoObtenido == rightLowerDiagonal:
+            register[i][j] = actualGold + rightLowerDiagonal
+            if camino3 != []:
+                caminosOptimos[i][j] = currentPath + camino3
+            else:
+                caminosOptimos[i][j] = currentPath
+        else:
+            register[i][j] = actualGold + right
+            if camino2 != []:
+                caminosOptimos[i][j] = currentPath + camino2
+            else:
+                caminosOptimos[i][j] = currentPath
+        return register[i][j], caminosOptimos[i][j]
     
     
     def getMaxGold(self):
-    
         maxGold = 0
+        caminoAlOro = []
         # Initialize the vector register
         register = [[-1 for i in range(self.column)]for j in range(self.row)]
-        
+        CaminosOptimos = [[-1 for i in range(self.column)]for j in range(self.row)]
         for i in range(self.row):
-    
             # Recursive function call for  ith row.
-            goldCollected = self.collectGold(self.goldMine, i, 0, register)
+            goldCollected, caminoProbable = self.collectGold(self.goldMine, i, 0, register, CaminosOptimos)
             maxGold = max(maxGold, goldCollected)
-    
-        return maxGold
+            if maxGold == goldCollected:
+                caminoAlOro = caminoProbable
+        return maxGold, caminoAlOro

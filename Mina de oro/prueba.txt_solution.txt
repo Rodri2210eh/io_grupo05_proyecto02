@@ -1,0 +1,13 @@
+
+ Matriz a ejecutar: 
+
+      10.0        3.0       30.0    20000.0
+       2.0       10.0        4.0      900.0
+     700.0        6.0       40.0      800.0
+     800.0       40.0     1000.0        1.0
+
+
+
+Camino optimo: [ ( 3, 0 )( 2, 1 )( 1, 2 )( 0, 3 ) ]
+ Maximo de oro: 20810.0
+ Duración de la ejecución: 0.0 segundos
