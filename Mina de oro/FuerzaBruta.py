@@ -6,6 +6,11 @@ class FuerzaBruta:
         self.column = column
     
     def collectGold(self, goldMine, i, j):
+        
+        '''
+        Metodo auxiliar para recorrer la matriz por medio de recursividad y obtiene el camino y el maximo de oro por llamada
+        Recorre todos los caminos aunque estos ya hayan sido recorridos con anterioridad
+        '''
     
         camino = []
         # condicion base
@@ -39,6 +44,11 @@ class FuerzaBruta:
         return totalMaxGold, camino
     
     def getMaxGold(self):
+        '''
+        Metodo principal de la llamada recursiva
+        Recorre las filas obteniendo el maximo de oro
+        regresa el maximo de oro y su camino
+        '''
         caminoOptimo = []
         maxGold = 0
     

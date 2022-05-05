@@ -7,6 +7,11 @@ class Dinamico:
         self.column = column
     
     def collectGold(self, gold, i, j, register, caminosOptimos):
+        '''
+        Metodo auxiliar para recorrer la matriz por medio de recursividad y obtiene el camino y el maximo de oro por llamada
+        registra el camino y los maximos de oro ya obtenidos con anterioridad, esto para evitar calcular nuevamente rutas o valores
+        de manera innecesaria
+        '''
         # Base condition.
         if ((i < 0) or (i == self.row) or (j == self.column)):
             currentPath = []
@@ -51,6 +56,11 @@ class Dinamico:
     
     
     def getMaxGold(self):
+        '''
+        inicializa la matriz de registro de oro y la matriz de registro de caminos optimos
+        recorre las filas obteniendo el maximo de oro
+        regresa el maximo de oro y su camino
+        '''
         maxGold = 0
         caminoAlOro = []
         # Initialize the vector register

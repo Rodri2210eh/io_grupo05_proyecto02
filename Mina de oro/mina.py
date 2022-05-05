@@ -31,6 +31,10 @@ def main():
         print("Algoritmo desconocido por favor ingrese un algoritmo válido")
 
 def algoritmoFuerzaBruta(goldMine, fileName):
+    '''
+    Metodo para buscar por medio de fuerza bruta el maximo de oro con su camino respectivo
+    Recibe el nombre del archivo y la matriz de los caminos
+    '''
     startTime = time()
     row = len(goldMine)
     column = len(goldMine[0])
@@ -43,6 +47,10 @@ def algoritmoFuerzaBruta(goldMine, fileName):
 
 
 def algoritmoDinamico(goldMine, fileName):
+    '''
+    Metodo para buscar por medio de un metood dinamico el maximo de oro con su camino respectivo
+    Recibe el nombre del archivo y la matriz de los caminos
+    '''
     startTime = time()
     row = len(goldMine)
     column = len(goldMine[0])
@@ -55,10 +63,18 @@ def algoritmoDinamico(goldMine, fileName):
     finalSolution(goldMine, caminoOptimo, maxGold, fileName, executionTime)
 
 def escribirMatriz(matriz):
+    '''
+    Metodo utilizado para imprimir la matriz de los caminos
+    Recibe la matriz a imprimir
+    '''
     printMatriz = '\n'.join([' '.join(['{:10}'.format(item) for item in row]) for row in matriz])
     print(printMatriz)
     
 def finalSolution(matriz, camino, maxGold, fileName, tiempo):
+    '''
+    Metodo para escribir el archivo de solucion con el formato deseado
+    recibe la matriz a imprimir, el camino, maximo de oro, nombre del archivo y el tiempo de ejecución
+    '''
     stringMatriz = '\n'.join([' '.join(['{:10}'.format(item) for item in row]) for row in matriz])
     stringCamino = "Camino optimo: [ "
     solutionFile = open(fileName + "_solution.txt", "w")
