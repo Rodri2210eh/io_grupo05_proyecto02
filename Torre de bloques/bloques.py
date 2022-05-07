@@ -3,6 +3,8 @@ import numpy as np
 import pandas as pd
 
 shapes = []
+final_result = {}
+register = {}
 
 def parse_file(filename):
     file = open(filename, "r")
@@ -63,20 +65,12 @@ def dynamic_programming(filename):
 
     parse_file(filename)
     order_shapes()
+    calculate_phases(0, 1, [])
+    write_solution()
 
-    abc = ["A", "B", "C", "D", "E"] # temporal identifier for blocks, change to randomized characters
+def calculate_phases(block_index, letter, phase):
+    global register
 
-    last_step = [[]]
-
-    f = open("solution.txt", "w")
-    counter = 1
-    f.write("ETAPA " + str(len(shapes)) + "\n")
-    f.write("\ts |\t\tf*(s) |\t\tx*  |\n")
-    f.write("\t----------------------------\n")
-
-    calculate_phases(0, 1, [], {})
-
-def calculate_phases(block_index, letter, phase, register):
     if block_index > len(shapes):
         return
     
@@ -93,7 +87,7 @@ def calculate_phases(block_index, letter, phase, register):
             counter += 1
         register[len(shapes)] = phase
         
-        calculate_phases(block_index + 1, letter + 1, phase, register)
+        calculate_phases(block_index + 1, letter + 1, phase)
     else:
         next_phase = []
 
@@ -114,7 +108,7 @@ def calculate_phases(block_index, letter, phase, register):
 
         # if last phase
         if block_index == len(shapes):
-            phase = ["Start"]
+            phase = ["Str"]
 
             for val in register[1]:
                 height = val[-2]
@@ -122,19 +116,62 @@ def calculate_phases(block_index, letter, phase, register):
             max_val = max(phase[1:])
             phase.append(max_val) # first phase, the optimal is END
             phase.append(register[1][phase.index(max_val) - 1][0])
-            register[0] = phase
+            register[0] = [phase]
 
-            print(register)
+            find_route()
         else:
-            calculate_phases(block_index + 1, letter + 1, next_phase, register)
+            calculate_phases(block_index + 1, letter + 1, next_phase)
 
+# only has support for ONE route
+def find_route():
+    global final_result
+    global register
+
+    counter = 0
+    route = []
+    route.append(register[0][0][0])
     
+    for i in range(len(register)):
+        index = [route[-1] in a for a in register[i]].index(True)
+        route.append(register[i][index][-1])
+
+    final_result = {register[0][0][-2] : route}
+    
+
 "Check if base is smaller than the other block"
 def check_block_stacking(fst_block, scnd_block):
     area1 = fst_block[0] * fst_block[1]     #c
     area2 = scnd_block[0] * scnd_block[1]   #d
 
     return area1 > area2
+
+def write_solution():
+    print(register)
+    print(final_result)
+
+    f = open("solution.txt", "w")
+
+    for x in register:
+        f.write("\nETAPA " + str(x) + "\n")
+        f.write("\ts |\t")
+        
+        if x == len(shapes):
+            f.write("f*(s) |\t\tx*  |\n")
+            f.write("\t-------------------------\n")
+            for i in register[x]:
+                f.write("\t" + str(i[0]) + "\t\t" + str(i[-2]) + "\t\t" +str(i[-1]) + "\n")
+        else:
+            for i in register[x+1]:
+                f.write("\t" + str(i[0]) + "|\t")
+
+            f.write("f*(s) |\t\tx*  |\n")
+            f.write("\t-------------------------------------\n")
+
+            for i in register[x]:
+                for charac in i:
+                    f.write("\t" + str(charac) + "\t")
+                f.write("\n")
+
 
 def main():
     try:
