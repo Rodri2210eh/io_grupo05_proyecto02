@@ -86,7 +86,7 @@ def calculate_phases(block_index, letter, phase):
         for r in rotated_block:
             block_id = abc[len(shapes) - letter] + str(counter)
             height = r[2]
-            phase.append([block_id, height, "END"]) # first phase, the optimal is END
+            phase.append([block_id, height, "Fin"]) # first phase, the optimal is Fin
             counter += 1
             blocks[block_id] = r
         register[len(shapes)] = phase
@@ -94,32 +94,40 @@ def calculate_phases(block_index, letter, phase):
         calculate_phases(block_index + 1, letter + 1, phase)
     else:
         next_phase = []
-
+        max_val = 0
         for r in rotated_block:
             row = []
             block_id = abc[len(shapes) - letter] + str(counter)
+            blocks[block_id] = r
             row.append(block_id)
-            for block in phase:
-                # check_block_stacking(r, block[1:-2]) # c y luego d
-                height = r[2] + block[-2]  #height + previous height; column sum
-                row.append(height) # first phase, the optimal is END
-            max_val = max(row[1:])
+            for prev_block in phase:
+                print(blocks[block_id], blocks[prev_block[0]])
+                if check_block_stacking(blocks[block_id], blocks[prev_block[0]]):
+                    height = r[2] + prev_block[-2]  #height + previous height; column sum
+                    row.append(height)
+                else:
+                    row.append(-1)
+            
+            if -1 in row:
+                max_val = -1
+            else:
+                max_val = max(row[1:])
             row.append(max_val)
             row.append(phase[row.index(max_val) - 1][0])
             next_phase.append(row)
             counter += 1
-            blocks[block_id] = r
+            
         register[len(shapes) - block_index] = next_phase
 
         # if last phase
         if block_index == len(shapes):
-            phase = ["Str"]
+            phase = ["Ini"]
 
             for val in register[1]:
                 height = val[-2]
                 phase.append(height) # the optimal is max
             max_val = max(phase[1:])
-            phase.append(max_val) # first phase, the optimal is END
+            phase.append(max_val)
             phase.append(register[1][phase.index(max_val) - 1][0])
             register[0] = [phase]
 
@@ -145,10 +153,10 @@ def find_route():
 
 "Check if base is smaller than the other block"
 def check_block_stacking(fst_block, scnd_block):
-    area1 = fst_block[0] * fst_block[1]     #c
-    area2 = scnd_block[0] * scnd_block[1]   #d
+    area1 = fst_block[0] * fst_block[1]
+    area2 = scnd_block[0] * scnd_block[1]
 
-    return area1 > area2
+    return area1 >= area2
 
 def write_solution(filename):
     f = open(filename + "_solution.txt", "w", encoding='utf-8')
