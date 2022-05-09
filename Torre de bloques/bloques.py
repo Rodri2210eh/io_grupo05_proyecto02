@@ -5,6 +5,7 @@ import pandas as pd
 shapes = []
 final_result = {}
 register = {}
+blocks = {}
 
 def parse_file(filename):
     file = open(filename, "r")
@@ -13,6 +14,7 @@ def parse_file(filename):
         dimensions = line.split(' ')
         num_dimensions = list(map(int, dimensions))     # convert to int type
         shapes.append(num_dimensions)
+    file.close()
     return shapes
 
 """
@@ -66,10 +68,11 @@ def dynamic_programming(filename):
     parse_file(filename)
     order_shapes()
     calculate_phases(0, 1, [])
-    write_solution()
+    write_solution(filename)
 
 def calculate_phases(block_index, letter, phase):
     global register
+    global blocks
 
     if block_index > len(shapes):
         return
@@ -85,6 +88,7 @@ def calculate_phases(block_index, letter, phase):
             height = r[2]
             phase.append([block_id, height, "END"]) # first phase, the optimal is END
             counter += 1
+            blocks[block_id] = r
         register[len(shapes)] = phase
         
         calculate_phases(block_index + 1, letter + 1, phase)
@@ -104,6 +108,7 @@ def calculate_phases(block_index, letter, phase):
             row.append(phase[row.index(max_val) - 1][0])
             next_phase.append(row)
             counter += 1
+            blocks[block_id] = r
         register[len(shapes) - block_index] = next_phase
 
         # if last phase
@@ -145,11 +150,8 @@ def check_block_stacking(fst_block, scnd_block):
 
     return area1 > area2
 
-def write_solution():
-    print(register)
-    print(final_result)
-
-    f = open("solution.txt", "w")
+def write_solution(filename):
+    f = open(filename + "_solution.txt", "w", encoding='utf-8')
 
     for x in register:
         f.write("\nETAPA " + str(x) + "\n")
@@ -172,6 +174,21 @@ def write_solution():
                     f.write("\t" + str(charac) + "\t")
                 f.write("\n")
 
+    final_height = [key for key in final_result.keys()][0]
+    
+    f.write(f'\nAltura máxima: {final_height} \n')
+    print("Altura máxima: ", final_height)
+    
+    for route in final_result.values():
+        f.write(f'Camino(s): {route} \nBloques: ')
+        print("Camino(s): ", route)
+        print("Bloques: ")
+        for block_id, block in blocks.items():
+            if block_id in route:
+                f.write(f'{block_id} {block} ')
+                print(block)
+
+    f.close()
 
 def main():
     try:
@@ -183,11 +200,9 @@ def main():
         if algorithm == "1":
             print("fuerza bruta")
         elif algorithm == "2":
-            print("programación dinámica")
             dynamic_programming(filename)
         else:
             print("ERROR: Algoritmo inválido.", algorithm)
             sys.exit()
-        print("file name: ", filename)
 
 main()
