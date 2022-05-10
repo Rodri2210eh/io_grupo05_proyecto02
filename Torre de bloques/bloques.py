@@ -6,6 +6,8 @@ shapes = []
 final_result = {}
 register = {}
 blocks = {}
+abc = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M",
+        "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
 def parse_file(filename):
     file = open(filename, "r")
@@ -73,6 +75,7 @@ def dynamic_programming(filename):
 def calculate_phases(block_index, letter, phase):
     global register
     global blocks
+    global abc
 
     if block_index > len(shapes):
         return
@@ -80,7 +83,6 @@ def calculate_phases(block_index, letter, phase):
     rotated_block = rotate_block(block_index)
 
     counter = 1
-    abc = ["A", "B", "C", "D", "E"] # temporal identifier for blocks, change to randomized characters
 
     if block_index == 0 and not phase:
         for r in rotated_block:
@@ -94,14 +96,15 @@ def calculate_phases(block_index, letter, phase):
         calculate_phases(block_index + 1, letter + 1, phase)
     else:
         next_phase = []
-        max_val = 0
+        max_num = 0
+        max_vals = []
         for r in rotated_block:
             row = []
             block_id = abc[len(shapes) - letter] + str(counter)
+            
             blocks[block_id] = r
             row.append(block_id)
             for prev_block in phase:
-                print(blocks[block_id], blocks[prev_block[0]])
                 if check_block_stacking(blocks[block_id], blocks[prev_block[0]]):
                     height = r[2] + prev_block[-2]  #height + previous height; column sum
                     row.append(height)
@@ -109,15 +112,20 @@ def calculate_phases(block_index, letter, phase):
                     row.append(-1)
             
             if -1 in row:
-                max_val = -1
+                max_num = -1
             else:
-                max_val = max(row[1:])
-            row.append(max_val)
-            row.append(phase[row.index(max_val) - 1][0])
+                max_num = max(row[1:])
+
+            max_vals = [i for i, j in enumerate(row[1:]) if j == max_num]
+            row.append(max_num)
+            for maxi in max_vals:
+                row.append(phase[maxi][0])
             next_phase.append(row)
             counter += 1
-            
+
         register[len(shapes) - block_index] = next_phase
+        
+        calculate_other_phases(phase, block_index, letter, block_index, [])
 
         # if last phase
         if block_index == len(shapes):
@@ -126,14 +134,53 @@ def calculate_phases(block_index, letter, phase):
             for val in register[1]:
                 height = val[-2]
                 phase.append(height) # the optimal is max
-            max_val = max(phase[1:])
-            phase.append(max_val)
-            phase.append(register[1][phase.index(max_val) - 1][0])
+            max_num = max(phase[1:])
+            max_vals = [i for i, j in enumerate(phase[1:]) if j == max_num]
+            phase.append(max_num)
+            for maxi in max_vals:
+                phase.append(register[1][maxi][0])
+            
             register[0] = [phase]
 
             find_route()
         else:
             calculate_phases(block_index + 1, letter + 1, next_phase)
+
+def calculate_other_phases(phase, index, letter, block_index, next_phase):
+    if block_index == len(shapes):
+        return
+
+    max_num = 0
+    max_vals = []
+    counter = 1
+    
+    rotated_block = rotate_block(block_index)
+    for r in rotated_block:
+        row = []
+        block_id = abc[len(shapes) - letter] + str(counter)
+        blocks[block_id] = r
+        row.append(block_id)
+        for prev_block in phase:
+            if check_block_stacking(blocks[block_id], blocks[prev_block[0]]):
+                height = r[2] + prev_block[-2]  #height + previous height; column sum
+                row.append(height)
+            else:
+                row.append(-1)
+        if -1 in row:
+            max_num = -1
+        else:
+            max_num = max(row[1:])
+
+        max_vals = [i for i, j in enumerate(row[1:]) if j == max_num]
+        row.append(max_num)
+        for maxi in max_vals:
+            row.append(phase[maxi][0])
+        next_phase.append(row)
+        counter += 1
+
+    calculate_other_phases(phase, index, letter + 1, block_index + 1, next_phase)
+
+    register[len(shapes) - index] = next_phase    
 
 # only has support for ONE route
 def find_route():
@@ -165,14 +212,20 @@ def write_solution(filename):
         f.write("\nETAPA " + str(x) + "\n")
         f.write("\ts |\t")
         
-        if x == len(shapes):
+        if x == len(shapes): # first phase
             f.write("f*(s) |\t\tx*  |\n")
             f.write("\t-------------------------\n")
             for i in register[x]:
                 f.write("\t" + str(i[0]) + "\t\t" + str(i[-2]) + "\t\t" +str(i[-1]) + "\n")
         else:
-            for i in register[x+1]:
-                f.write("\t" + str(i[0]) + "|\t")
+            for i in range(len(register[x+1])):
+                if i == 0:
+                    f.write("\t" + str(register[x+1][i][0]) + "|\t")
+                else:
+                    if register[x+1][i-1][0][0] == register[x+1][i][0][0]:
+                        f.write("\t" + str(register[x+1][i][0]) + "|\t")
+                    else:
+                        break
 
             f.write("f*(s) |\t\tx*  |\n")
             f.write("\t-------------------------------------\n")
