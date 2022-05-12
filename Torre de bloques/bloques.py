@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-import pandas as pd
+from itertools import permutations
 
 shapes = []
 final_result = {}
@@ -26,51 +26,53 @@ Output: -
 Description: Function that orders the shape in descending order depending on their base
 """
 def order_shapes():
-    global shapes
+    global blocks
 
-    arr_shapes = np.array(shapes)
-    first_sorted = arr_shapes[np.argsort(arr_shapes[:, 0])] # sorted by first column (length)
-    shapes = first_sorted[np.argsort(first_sorted[:, 1])] # sorted by second column (width)
-    #shapes = second_sorted[::-1]
+    blocks = {k: v for k, v in sorted(blocks.items(), key=lambda item: item[1])}
 
-def rotate_block(shape_index):
-    rotations = []
-    while len(rotations) < 3 and shape_index < len(shapes):
-        F = shapes[shape_index][0]
-        P = shapes[shape_index][1]
-        A = shapes[shape_index][2]
-        if F <= P:
-            shape_rot = [F, P, A]
-            rotations.append(shape_rot)
-            #print("rotation 3", shapes[shape_index])
-        if F < P and P < A:
-            shape_rot = [P, A, F]
-            rotations.append(shape_rot)
-            #print("rotation 1", shapes[shape_index])
-        if F <= A:
-            shape_rot = [F, A, P]
-            rotations.append(shape_rot)
-            #print("rotation 2", shapes[shape_index])
-        if A <= P:
-            shape_rot = [A, P, F]
-            rotations.append(shape_rot)
-            #print("rotation 4", shapes[shape_index])
-        if F < P and A < P:
-            shape_rot = [A, F, P]
-            rotations.append(shape_rot)
-            #print("rotation 5", shapes[shape_index])
+"""
+Function: rotate_blocks
+Input: -
+Output: -
+Description: Function that rotates all the blocks given
+"""
+def rotate_blocks():
+    shape_index = 0
+    letter = 1
 
-    rotations = [list(i) for i in set(map(tuple, rotations))]
-    return rotations
-
+    while shape_index < len(shapes):
+        counter = 1
+        all_rotations = list(permutations(shapes[shape_index]))
+        for rot in all_rotations:
+            block_id = abc[len(shapes) - letter] + str(counter)
+            F = rot[0]
+            P = rot[1]
+            A = rot[2]
+            
+            if F <= P:
+                blocks[block_id] = rot
+                counter += 1
+        shape_index += 1
+        letter += 1
 
 def dynamic_programming(filename):
     global shapes
 
     parse_file(filename)
+    rotate_blocks()
     order_shapes()
-    calculate_phases(0, 1, [])
-    write_solution(filename)
+    print("blocks", blocks)
+    #calculate_phases(0, 1, [])
+    #write_solution(filename)
+
+"Check if base is smaller than the other block"
+def check_block_stacking(fst_block, scnd_block):
+    F1 = fst_block[0]
+    F2 = scnd_block[0]
+    P1 = fst_block[1]
+    P2 = scnd_block[1]
+    
+    return F1 < F2 and P1 < P2
 
 def calculate_phases(block_index, letter, phase):
     global register
@@ -196,14 +198,6 @@ def find_route():
         route.append(register[i][index][-1])
 
     final_result = {register[0][0][-2] : route}
-    
-
-"Check if base is smaller than the other block"
-def check_block_stacking(fst_block, scnd_block):
-    area1 = fst_block[0] * fst_block[1]
-    area2 = scnd_block[0] * scnd_block[1]
-
-    return area1 >= area2
 
 def write_solution(filename):
     f = open(filename + "_solution.txt", "w", encoding='utf-8')
