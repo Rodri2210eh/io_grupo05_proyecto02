@@ -4,11 +4,12 @@ import time
 blocks = []
 start_time = time.time()  # starts time
 
+
 def brute_force_programming(filename):
     global blocks
     parse_file(filename)
     rotate_blocks()
-    combination_list=combinations()
+    combination_list = combinations()
     calculation(combination_list)
 
 
@@ -42,18 +43,19 @@ def rotate_blocks():
         shape_index += 1
         letter += 1
     blocks = temp_blocks
-    #print(blocks)
+    # print(blocks)
+
 
 def combinations():
     position_list = []
-    for i in range(0,len(blocks)-1):
+    for i in range(0, len(blocks) - 1):
         position_list.append(i)
 
     combination_list = [[]]  # crea la lista de posibles combinaciones
     for x in position_list:
         n_sub_conj = [subConj + [x] for subConj in combination_list]
         combination_list.extend(n_sub_conj)
-    #print(combination_list)
+    # print(combination_list)
     return combination_list
 
 
@@ -63,25 +65,26 @@ def calculation(combination_list):
 
     for i in combination_list:
         sum_a = 0
-        old_f=1000  #un numero alto para que siempre se cumpla la condicion
-        old_p=1000
-        sum_element=''
+        old_f = 1000  # un numero alto para que siempre se cumpla la condicion
+        old_p = 1000
+        sum_element = ''
         for j in i:
             new_f = int(blocks[j][0])
             new_p = int(blocks[j][1])
 
-            if new_f  < old_f and  new_p < old_p : # si la condicion no se cumple
+            if new_f < old_f and new_p < old_p:  # si la condicion no se cumple
                 old_p = new_p
                 old_f = new_f
                 sum_a += int(blocks[j][2])
                 sum_element += str(blocks[j]) + "+"
 
             else:
-                #a_list.append(sum_a)
-                #elem_list.append(sum_element)
                 break
         a_list.append(sum_a)
         elem_list.append(sum_element)
+
+    # Salida
+
     end_time = time.time()
     print("Output:")
     print("altura maxima:" + str(max(a_list)))
@@ -90,4 +93,3 @@ def calculation(combination_list):
     print("Bloques:" + str(elem_included))
     end_time = time.time()
     print("Tiempo de ejecución: " + str(end_time - start_time) + " segundos")
-
